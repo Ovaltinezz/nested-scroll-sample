@@ -33,24 +33,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ovt.nested_scroll_sample.ui.theme.Purple80
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun Collapsing(showCollapsing: MutableState<Boolean>) {
     val context = LocalContext.current
     val screenWidthPx = context.resources.displayMetrics.widthPixels
-    val screenWidth = with(LocalDensity.current) { screenWidthPx.toDp() }
     val minHeight = 45.dp
     val minHeightPx = with(LocalDensity.current) { minHeight.roundToPx().toFloat() }
     val maxHeight = 200.dp
     val maxHeightPx = with(LocalDensity.current) { maxHeight.roundToPx().toFloat() }
     val headerFromStart = 50.dp
+    val headerFromStartPx = with(LocalDensity.current) { headerFromStart.roundToPx().toFloat() }
     val deltaHeight = maxHeightPx - minHeightPx
     var headerWidthPx by remember { mutableStateOf(-1) }
     val targetPercent by remember { mutableStateOf(Animatable(1f)) }
@@ -114,16 +116,18 @@ fun Collapsing(showCollapsing: MutableState<Boolean>) {
                 color = Color.White,
                 fontSize = 30.sp.times(targetPercent.value * 0.5 + 1),
                 modifier = Modifier
-                    .onGloballyPositioned {
-                        headerWidthPx = it.size.width
+                    .onSizeChanged {
+                        headerWidthPx = it.width
                     }
-                    .offset(
-                        x = if (headerWidthPx > 0) {
-                            val headerWidth = with(LocalDensity.current) { headerWidthPx.toDp() }
-                            (screenWidth - headerWidth - headerFromStart * 2) *
-                                    targetPercent.value / 2 + headerFromStart
-                        } else 0.dp,
-                    )
+                    .offset {
+                        IntOffset(
+                            x = if (headerWidthPx > 0) {
+                                ((screenWidthPx - headerWidthPx - headerFromStartPx * 2) *
+                                        targetPercent.value / 2 + headerFromStartPx).roundToInt()
+                            } else 0,
+                            y = 0
+                        )
+                    }
             )
         }
         List()
