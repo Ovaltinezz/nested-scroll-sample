@@ -51,7 +51,7 @@ fun Collapsing(showCollapsing: MutableState<Boolean>) {
     val minHeightPx = with(LocalDensity.current) { minHeight.roundToPx().toFloat() }
     val maxHeight = 200.dp
     val maxHeightPx = with(LocalDensity.current) { maxHeight.roundToPx().toFloat() }
-    val headerFromStart = 50.dp
+    val headerFromStart = 20.dp
     val headerFromStartPx = with(LocalDensity.current) { headerFromStart.roundToPx().toFloat() }
     val deltaHeight = maxHeightPx - minHeightPx
     var headerWidthPx by remember { mutableStateOf(-1) }
@@ -114,16 +114,18 @@ fun Collapsing(showCollapsing: MutableState<Boolean>) {
             Text(
                 text = "Header",
                 color = Color.White,
-                fontSize = 30.sp.times(targetPercent.value * 0.5 + 1),
+                fontSize = 30.sp,
                 modifier = Modifier
                     .onSizeChanged {
-                        headerWidthPx = it.width
+                        if (headerWidthPx == -1) {
+                            headerWidthPx = it.width
+                        }
                     }
                     .offset {
                         IntOffset(
                             x = if (headerWidthPx > 0) {
                                 ((screenWidthPx - headerWidthPx - headerFromStartPx * 2) *
-                                        targetPercent.value / 2 + headerFromStartPx).roundToInt()
+                                        (1 - targetPercent.value) / 2 + headerFromStartPx).roundToInt()
                             } else 0,
                             y = 0
                         )
