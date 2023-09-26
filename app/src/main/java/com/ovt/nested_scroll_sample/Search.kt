@@ -4,7 +4,10 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -146,6 +150,8 @@ class SearchState {
 
 @Composable
 fun Search(modifier: Modifier = Modifier, state: SearchState = rememberSearchState()) {
+    val flingBehavior = ScrollableDefaults.flingBehavior()
+    val listState = rememberLazyListState()
     Layout(
         content = {
             // TopBar()
@@ -183,7 +189,7 @@ fun Search(modifier: Modifier = Modifier, state: SearchState = rememberSearchSta
                     .background(Brush.verticalGradient(listOf(PurpleGrey40, PurpleGrey80)))
             )
             // CommodityList()
-            List()
+            List(listState)
         },
         modifier = modifier
             .fillMaxSize()
@@ -191,6 +197,24 @@ fun Search(modifier: Modifier = Modifier, state: SearchState = rememberSearchSta
                 state = state.scrollableState,
                 orientation = Orientation.Vertical,
                 reverseDirection = true,
+                flingBehavior = remember {
+                    object : FlingBehavior {
+                        override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                            val remain = with(this) {
+                                with(flingBehavior) {
+                                    performFling(initialVelocity)
+                                }
+                            }
+                            if (remain > 0) {
+                                listState.scroll {
+                                    performFling(remain)
+                                }
+                                return 0f
+                            }
+                            return remain
+                        }
+                    }
+                },
             )
             .nestedScroll(state.nestedScrollConnection)
     ) { measurables, constraints ->

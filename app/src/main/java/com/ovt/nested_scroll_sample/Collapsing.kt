@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -137,9 +139,10 @@ fun Collapsing(showCollapsing: MutableState<Boolean>) {
 }
 
 @Composable
-fun List() {
+fun List(state: LazyListState = rememberLazyListState()) {
     LazyColumn(
-        Modifier.fillMaxWidth()
+        Modifier.fillMaxWidth(),
+        state
     ) {
         repeat(100) {
             item {
