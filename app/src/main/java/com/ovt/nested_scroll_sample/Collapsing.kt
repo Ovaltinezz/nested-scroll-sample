@@ -2,6 +2,7 @@ package com.ovt.nested_scroll_sample
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +42,7 @@ import com.ovt.nested_scroll_sample.ui.theme.Purple80
 import kotlinx.coroutines.launch
 
 @Composable
-fun Collapsing() {
+fun Collapsing(showCollapsing: MutableState<Boolean>) {
     val context = LocalContext.current
     val screenWidthPx = context.resources.displayMetrics.widthPixels
     val screenWidth = with(LocalDensity.current) { screenWidthPx.toDp() }
@@ -105,6 +107,7 @@ fun Collapsing() {
                     .padding(top = 10.dp, start = 10.dp)
                     .size(30.dp)
                     .align(Alignment.TopStart)
+                    .clickable { showCollapsing.value = false }
             )
             Text(
                 text = "Header",

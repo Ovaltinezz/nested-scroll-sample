@@ -3,22 +3,32 @@ package com.ovt.nested_scroll_sample
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
@@ -38,6 +48,33 @@ import com.ovt.nested_scroll_sample.ui.theme.Purple80
 import com.ovt.nested_scroll_sample.ui.theme.PurpleGrey40
 import com.ovt.nested_scroll_sample.ui.theme.PurpleGrey80
 import kotlin.math.roundToInt
+
+@Composable
+fun SearchView(
+    showSearch: MutableState<Boolean>,
+    state: SearchState = rememberSearchState(),
+) {
+    Box(Modifier.fillMaxSize()) {
+        Search(Modifier.padding(top = 45.dp), state)
+        Box(modifier = Modifier
+            .background(lightColorScheme().primary)
+            .fillMaxWidth()
+            .height(45.dp)
+            .align(Alignment.TopCenter)
+        ) {
+            Icon(
+                Icons.Filled.ArrowBack,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .padding(top = 10.dp, start = 10.dp)
+                    .size(30.dp)
+                    .align(Alignment.TopStart)
+                    .clickable { showSearch.value = false }
+            )
+        }
+    }
+}
 
 @Composable
 fun rememberSearchState(): SearchState {
@@ -102,16 +139,13 @@ class SearchState {
             else if (available.y > 0 && canScrollForward2) {
                 val deltaY = available.y.coerceAtMost((value - cardHeight).toFloat())
                 consume(available.copy(y = deltaY))
-            }
-            else super.onPreScroll(available, source)
+            } else super.onPreScroll(available, source)
         }
     }
 }
 
 @Composable
-fun Search(
-    state: SearchState = rememberSearchState()
-) {
+fun Search(modifier: Modifier = Modifier, state: SearchState = rememberSearchState()) {
     Layout(
         content = {
             // TopBar()
@@ -151,7 +185,7 @@ fun Search(
             // CommodityList()
             List()
         },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .scrollable(
                 state = state.scrollableState,
