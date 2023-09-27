@@ -31,6 +31,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,7 @@ import com.ovt.nested_scroll_sample.ui.theme.Purple40
 import com.ovt.nested_scroll_sample.ui.theme.Purple80
 import com.ovt.nested_scroll_sample.ui.theme.PurpleGrey40
 import com.ovt.nested_scroll_sample.ui.theme.PurpleGrey80
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
@@ -152,6 +154,22 @@ class SearchState {
 fun Search(modifier: Modifier = Modifier, state: SearchState = rememberSearchState()) {
     val flingBehavior = ScrollableDefaults.flingBehavior()
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val outerNestedScrollConnection = object : NestedScrollConnection {
+        override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource
+        ): Offset {
+            if (available.y < 0) {
+                scope.launch {
+                    listState.scrollBy(-available.y)
+                }
+                return available
+            }
+            return super.onPostScroll(consumed, available, source)
+        }
+    }
     Layout(
         content = {
             // TopBar()
@@ -193,6 +211,7 @@ fun Search(modifier: Modifier = Modifier, state: SearchState = rememberSearchSta
         },
         modifier = modifier
             .fillMaxSize()
+            .nestedScroll(outerNestedScrollConnection)
             .scrollable(
                 state = state.scrollableState,
                 orientation = Orientation.Vertical,
