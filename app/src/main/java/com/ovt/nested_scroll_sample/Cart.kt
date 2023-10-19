@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -125,15 +124,23 @@ private fun CartList() {
     }
 }
 
-/**
- * 卡片上部分的形状.
- */
-val ShapeOfCardTop = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-
-/**
- * 卡片下部分的形状.
- */
-val ShapeOfCardBottom = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+@Composable
+fun StickyCartListWithRefresh() {
+    val scope = rememberCoroutineScope()
+    val state = rememberPullToRefreshState(isRefreshing = false)
+    PullToRefresh(
+        state = state,
+        onRefresh = {
+            scope.launch {
+                state.isRefreshing = true
+                delay(1000)
+                state.isRefreshing = false
+            }
+        }
+    ) {
+        StickyCartList()
+    }
+}
 
 @Composable
 fun rememberCartState(): CartState {
@@ -206,7 +213,7 @@ fun Cart(modifier: Modifier = Modifier, state: CartState = rememberCartState()) 
                     .background(Brush.verticalGradient(listOf(PurpleGrey40, PurpleGrey80)))
             )
             // CartList()
-            CartList()
+            StickyCartListWithRefresh()
         },
         modifier = modifier
             .fillMaxSize()
@@ -231,9 +238,9 @@ fun Cart(modifier: Modifier = Modifier, state: CartState = rememberCartState()) 
         )
         state.maxValue = firstPlaceable.height
         layout(constraints.maxWidth, constraints.maxHeight) {
+            bottomPlaceable.placeRelative(0, firstHeight + secondPlaceable.height - state.value)
             firstPlaceable.placeRelative(0, -state.value)
             secondPlaceable.placeRelative(0, firstHeight - state.value)
-            bottomPlaceable.placeRelative(0, firstHeight + secondPlaceable.height - state.value)
         }
     }
 }
